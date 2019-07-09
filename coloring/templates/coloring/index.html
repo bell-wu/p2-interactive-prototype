@@ -40,7 +40,7 @@
 	<script type="text/javascript" canvas="canvas">
 		window.onload = function() {
 			var canvas = document.getElementById('myCanvas');
-
+      
 			// coloring page
 			var mandala = {
 				item: null,
@@ -50,7 +50,7 @@
 
 			// color palette
 			var cp = {
-				history: ["#000000"], // black selected by default
+				history: ["red"], // black selected by default
 				options: [],
 				$container: $('#color-palette')
 			}
@@ -58,14 +58,33 @@
 			// your rectangle gradient interaction goes in this function
 			// you may also add code outside of the function (e.g., global variables)
 			function myGradientInteraction(){
+        
+        var rect = new paper.Rectangle(new paper.Point(150, 250), new paper.Point(575, 475));
+        var path = new paper.Path.Rectangle(rect);
+
+        path.fillColor = 'red';
+        path.closed = true;
+
+        paper.view.draw();
+
 				var tool = new paper.Tool();
+        var o;
 
 				tool.onMouseDown = function (event) {
-
+          o = event.point;
 				}
 
 				tool.onMouseUp = function (event) {
-					
+					var newFill = {
+            gradient: {
+              stops: [cp.history[cp.history.length - 2], cp.history[cp.history.length - 1]]
+            },
+            origin: o,
+            destination: event.point
+          }
+          
+          path.fillColor = newFill;
+          paper.view.draw();
 				}
 			}
 
