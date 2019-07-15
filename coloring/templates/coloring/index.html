@@ -1,4 +1,4 @@
-<!-- {% load static %} -->
+{% load static %}
 
 <!DOCTYPE html>
 <html>
@@ -10,9 +10,6 @@
 	<script type="text/javascript" src="{% static 'coloring/vendors/paper/paper-full.min.js' %}"></script>
   
   <script src="{% static '/vendors/hammer/hammer.min.js' %}"></script>
-	<script src="{% static '/vendors/hammer/jquery.hammer.js' %}"></script>
-
-	<script src="{% static '/vendors/hammer/hammer.min.js' %}"></script>
 	<script src="{% static '/vendors/hammer/jquery.hammer.js' %}"></script>
 
 	<style type="text/css">
@@ -32,25 +29,25 @@
       height: 500px;
       width: 100%;
       align-self: center
-		}
+    }
 /*     canvas#colorPalette[resize] {
       height: 310px;
       width: 310px;      
     } */
-		.swatch {
-			width: 24px;
-			height: 24px;
-			-moz-border-radius: 12px;
-			-webkit-border-radius: 12px;
-			border-radius: 12px;
-			margin: 3px;
-		}
-		#myCanvas {
+    .swatch {
+      width: 24px;
+      height: 24px;
+      -moz-border-radius: 12px;
+      -webkit-border-radius: 12px;
+      border-radius: 12px;
+      margin: 3px;
+    }
+    #myCanvas {
       margin: auto;
       border-style: solid;
       border-width: 2px;
       min-width: 750px;
-		}
+    }
     #myCanvas[resize] {
     }
     button {
@@ -60,10 +57,9 @@
 
 	<script type="text/javascript" canvas="canvas">
     paper.install(window);
-    
     var myCanvas, colorPalette;
     var toolCanvas, toolPalette;
-    var curColor = new Color({hue: 0, saturation: 0.5, lightness: 0.5});
+    var curColor = new Color({ hue: 0, saturation: 0.5, lightness: 0.5 });
     var colConfirm = true;
 
     // color palette
@@ -81,41 +77,35 @@
       
       // coloring page
       myCanvas = new PaperScope();
-      paper.setup('myCanvas');
-      
-      toolCanvas = new Tool();			
-      
-			// your rectangle gradient interaction goes in this function
-			// you may also add code outside of the function (e.g., global variables)
-			function myGradientInteraction(){
-        
-        var rect = new Rectangle(new Point(0, 0), new Size(400, 300));
-        rect.center = paper.project.view.center;
-        var path = new Path.Rectangle(rect);
+			paper.setup('myCanvas');
+			toolCanvas = new Tool();
 
-        path.fillColor = 'red';
+			function myGradientInteraction() {
+				var rect = new Rectangle(new Point(0, 0), new Size(400, 300));
+				rect.center = paper.project.view.center;
+				var path = new Path.Rectangle(rect);
 
-        var o;
+				path.fillColor = 'red';
 
-				toolCanvas.onMouseDown = function (event) {
-          o = event.point;
+				var o;
+
+				toolCanvas.onMouseDown = function(event) {
+					o = event.point;
 				}
 
 				toolCanvas.onMouseUp = function (event) {
 					var newFill = {
-            gradient: {
-              stops: [cp.history[cp.history.length - 2], cp.history[cp.history.length - 1]]
-            },
-            origin: o,
-            destination: event.point
-          }
-          
-          path.fillColor = newFill;
+						gradient: {
+							stops: [cp.history[cp.history.length - 2], cp.history[cp.history.length - 1]]
+						},
+						origin: o,
+						destination: event.point
+					}
+
+					path.fillColor = newFill;
 				}
 			}
 
-			// your custom interaction goes here!
-			// you may replace everything
 			function myCustomInteraction() {
 
 				toolCanvas.onMouseDown = function (event) {
@@ -131,18 +121,18 @@
 			// To see your myCustomInteraction version visit: 
 			// http://<your url>:8000/coloring/
       
-      paper.project.importSVG(mandala.filePath, function(item) { 
-        mandala.item = item._children["design-freepik"];
-        mandala.item.bounds.size = new Size(paper.project.view.size.width - 4, paper.project.view.size.height - 4);
-        mandala.item.center = new Point(paper.project.view.center.x, paper.project.view.center.y);
-        
-        paper.project.insertLayer(0, mandala.item);
-        if (window.location.href.indexOf("gradient") > - 1) {
-          myGradientInteraction();	
-        } else {
-          myCustomInteraction();
-        }					
-      });     
+			paper.project.importSVG(mandala.filePath, function(item) {
+				mandala.item = item._children["design-freepik"];
+				mandala.item.bounds.size = new Size(paper.project.view.size.width - 4, paper.project.view.size.height - 4);
+				mandala.item.center = new Point(paper.project.view.center.x, paper.project.view.center.y);
+
+				paper.project.insertLayer(0, mandala.item);
+				if (window.location.href.indexOf("gradient") > -1) {
+					myGradientInteraction();
+				} else {
+					myCustomInteraction();
+				}
+			});     
       
 //       paper.view.onResize = function(event) {
 //         myCanvas.position = paper.view.center;
@@ -158,90 +148,118 @@
         size: [paper.project.view.size.width - 2, (paper.project.view.size.width - 2) * 0.1]
       });
       colorBar.fillColor = {
-        gradient: {
-          stops: [['#bf4040'], ['#40bf40'], ['#4040bf'], ['#bf4040']]
-        }, origin: colorBar.bounds.leftCenter, destination: colorBar.bounds.rightCenter
-      };
+				gradient: {
+					stops: [['#bf4040'],
+									['#40bf40'],
+									['#4040bf'],
+									['#bf4040']]
+				},
+				origin: colorBar.bounds.leftCenter,
+				destination: colorBar.bounds.rightCenter
+			};
       
-      var slGrid = new Path.Rectangle({
-        point: [colorBar.bounds.x, colorBar.bounds.bottom + 2],
-        size: [colorBar.bounds.width, colorBar.bounds.width],
-        strokeColor: 'black'
-      });
-      slGrid.fillColor = {
-        gradient: {
-          stops: [[new Color({hue: curColor.hue, saturation: 0, lightness: 0})], [curColor], [new Color({hue: curColor.hue, saturation: 1, lightness: 1})]]    
-        }, origin: slGrid.bounds.topLeft, destination: slGrid.bounds.bottomRight
-      };
-      
-      var showCol = new Path.Rectangle({
-        point: [colorBar.bounds.x, slGrid.bounds.bottom + 2],
-        size: [(colorBar.bounds.width - 2) / 2 , (colorBar.bounds.width - 2) / 2],
-        strokeColor: 'black',
-        fillColor: curColor
-      });
-      
-      var tempCol = new Path.Rectangle({
-        point: [showCol.bounds.left, showCol.bounds.top],
-        size: [showCol.bounds.width, showCol.bounds.height / 2],
-        visible: false
-      });      
-      console.log(tempCol);
-      
-      colorBar.onMouseEnter = function(e) {
-        tempCol.visible = true;
-        tempCol.fillColor = {hue: (e.point.x - colorBar.bounds.x) / colorBar.bounds.width * 360, saturation: 0.5, lightness: 0.5};
-      };
-      
-      colorBar.onMouseMove = function(e) {
-        tempCol.fillColor.hue = (e.point.x - colorBar.bounds.x) / colorBar.bounds.width * 360;
-      };
-      
-      colorBar.onMouseLeave = function() {
-        if (tempCol.visible) tempCol.visible = false;
-      };
-      
-      colorBar.onMouseDown = function() {
-        if (!tempCol.visible) tempCol.visible = true;
-      };
-      
-      colorBar.onMouseUp = function(e) {
-        curColor = {hue: (e.point.x - colorBar.bounds.x) / colorBar.bounds.width * 360, saturation: 0.5, lightness: 0.5};
-        colConfirm = false;
-        showCol.fillColor = curColor;
-        tempCol.visible = false;
-        slGrid.fillColor.gradient.stops[0].color.hue = curColor.hue;
-        slGrid.fillColor.gradient.stops[1].color.hue = curColor.hue;
-        slGrid.fillColor.gradient.stops[2].color.hue = curColor.hue;
-      };
-      
-      slGrid.onMouseEnter = function(e) {
-        tempCol.visible = true;
-        tempCol.fillColor.saturation = (e.point.x - slGrid.bounds.x) / slGrid.bounds.width;
-        tempCol.fillColor.lightness = (e.point.y - slGrid.bounds.y) / slGrid.bounds.height;
-      };
-      
-      slGrid.onMouseMove = function(e) {
-        tempCol.fillColor.saturation = (e.point.x - slGrid.bounds.x) / slGrid.bounds.width;
-        tempCol.fillColor.lightness = (e.point.y - slGrid.bounds.y) / slGrid.bounds.height;
-      };
-      
-      slGrid.onMouseLeave = function() {
-        if (tempCol.visible) tempCol.visible = false;
-      };
-      
-      slGrid.onMouseDown = function() {
-        if (!tempCol.visible) tempCol.visible = true;
-      };
-      
-      slGrid.onMouseUp = function(e) {
-        curColor.saturation = (e.point.x - slGrid.bounds.x) / slGrid.bounds.width;
-        curColor.lightness = (e.point.y - slGrid.bounds.y) / slGrid.bounds.height;
-      
-        colConfirm = false;
-        showCol.fillColor = curColor;
-        tempCol.visible = false;
-      };
+			var slGrid = new Path.Rectangle({
+				point: [colorBar.bounds.x, colorBar.bounds.bottom + 2],
+				size: [colorBar.bounds.width, colorBar.bounds.width],
+				strokeColor: 'black',
+				blendMode: 'overlay'
+			});
+			slGrid.fillColor = {
+				gradient: {
+					stops: [[new Color({ hue: curColor.hue, saturation: 0, lightness: 0.5 })],
+									[new Color({ hue: curColor.hue, saturation: 1, lightness: 0.5 })]]
+				},
+				origin: slGrid.bounds.leftCenter,
+				destination: slGrid.bounds.rightCenter
+			};
+			
+			var o = new Path.Rectangle(slGrid.point, slGrid.size);
+			o.fillColor = {
+				gradient: {
+					stops: [[new Color({ hue: curColor.hue, saturation: 0.5, lightness: 0 })],
+									[new Color({ hue: curColor.hue, saturation: 0.5, lightness: 1 })]]
+				},
+				origin: o.bounds.topCenter,
+				destination: o.bounds.bottomCenter
+			};
+			o.insertBelow(slGrid);
+			
+			var showCol = new Path.Rectangle({
+				point: [colorBar.bounds.x, slGrid.bounds.bottom + 2],
+				size: [(colorBar.bounds.width - 2) / 2, (colorBar.bounds.width - 2) / 2],
+				strokeColor: 'black',
+				fillColor: curColor
+			});
+			
+			var tempCol = new Path.Rectangle({
+				point: [showCol.bounds.left, showCol.bounds.top],
+				size: [showCol.bounds.width, showCol.bounds.height / 2],
+				fillColor: curColor,
+				visible: false
+			});
+			
+			colorBar.onMouseEnter = function(e) {
+				tempCol.visible = true;
+				tempCol.fillColor = {
+					hue: (e.point.x - colorBar.bounds.x) / colorBar.bounds.width * 360,
+					saturation: 0.5,
+					lightness: 0.5
+				};
+			};
+
+			colorBar.onMouseMove = function(e) {
+				tempCol.fillColor.hue = (e.point.x - colorBar.bounds.x) / colorBar.bounds.width * 360;
+			};
+
+			colorBar.onMouseLeave = function() {
+				if (tempCol.visible) tempCol.visible = false;
+			};
+
+			colorBar.onMouseDown = function() {
+				if (!tempCol.visible) tempCol.visible = true;
+			};
+
+			colorBar.onMouseUp = function(e) {
+				curColor = {
+					hue: (e.point.x - colorBar.bounds.x) / colorBar.bounds.width * 360,
+					saturation: 0.5,
+					lightness: 0.5
+				};
+				colConfirm = false;
+				showCol.fillColor = curColor;
+				tempCol.visible = false;
+				slGrid.fillColor.gradient.stops[0].color.hue = curColor.hue;
+				slGrid.fillColor.gradient.stops[1].color.hue = curColor.hue;
+			};
+			
+			slGrid.onMouseEnter = function(e) {
+				tempCol.visible = true;
+				tempCol.fillColor.hue = curColor.hue;
+				tempCol.fillColor.saturation = (e.point.x - slGrid.bounds.x) / slGrid.bounds.width;
+				tempCol.fillColor.lightness = (e.point.y - slGrid.bounds.y) / slGrid.bounds.height;
+			};
+
+			slGrid.onMouseMove = function(e) {
+				tempCol.fillColor.saturation = (e.point.x - slGrid.bounds.x) / slGrid.bounds.width;
+				tempCol.fillColor.lightness = (e.point.y - slGrid.bounds.y) / slGrid.bounds.height;
+			};
+
+			slGrid.onMouseLeave = function() {
+				if (tempCol.visible) tempCol.visible = false;
+			};
+
+			slGrid.onMouseDown = function() {
+				if (!tempCol.visible) tempCol.visible = true;
+			};
+
+			slGrid.onMouseUp = function(e) {
+				curColor.saturation = (e.point.x - slGrid.bounds.x) / slGrid.bounds.width;
+				curColor.lightness = (e.point.y - slGrid.bounds.y) / slGrid.bounds.height;
+
+				colConfirm = false;
+				showCol.fillColor = curColor;
+				tempCol.visible = false;
+			};
       
       
 //       colorBar.onM

@@ -141,10 +141,15 @@
           }
           var hit = mandala.item.hitTest(point, { tolerance: 1, fill: true });
           
-          console.log('press');
-          console.log(event);
-          document.getElementById("popup").style.display = "block";
-          
+          var x = document.getElementsByClassName("rec");
+          for (i = 0; i < x.length; i++) {
+            x[i].style.display = "block";
+            var r = Math.floor(Math.random() * 255);
+            var g = Math.floor(Math.random() * 255);
+            var b = Math.floor(Math.random() * 255);
+            var new_color = "rgb(" + r + ", " + g + ", " + b + ")";
+            x[i].setAttribute("style", "background-color: " + new_color + ";");
+          }
         });
 			}
       
@@ -196,15 +201,6 @@
 			} else {
 				init(true);
 			}
-      
-      
-      function closePopup() {
-        document.getElementById("popup").style.opacity = 0;
-      }
-
-      function openPopup() {
-        document.getElementById("popup").style.opacity = 1;
-      }
 		}
 	</script>
 </head>
@@ -216,9 +212,13 @@
 	<div id="color-palette"></div>
   
   <div id="popup">
-    <div class="swatch" style="background-color: rgb(3, 169, 244);"></div>
-    <div class="swatch" style="background-color: rgb(200, 169, 244);"></div>
-    <div class="swatch" style="background-color: rgb(3, 169, 9);"></div>
+    Recommended Colors
+    <div class="swatch rec" style="background-color: rgb(3, 169, 244);"></div>
+    <div class="swatch rec" style="background-color: rgb(200, 169, 244);"></div>
+    <div class="swatch rec" style="background-color: rgb(3, 169, 9);"></div>
+    <div class="swatch rec" style="background-color: rgb(30, 19, 244);"></div>
+    <div class="swatch rec" style="background-color: rgb(200, 209, 2);"></div>
+    <div class="swatch rec" style="background-color: rgb(3, 1, 9);"></div>
       
   </div>
 </body>
