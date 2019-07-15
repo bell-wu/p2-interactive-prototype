@@ -8,23 +8,35 @@
 
 	<script type="text/javascript" src="{% static 'coloring/vendors/jquery/jquery-3.3.1.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'coloring/vendors/paper/paper-full.min.js' %}"></script>
+  
+  <script src="{% static '/vendors/hammer/hammer.min.js' %}"></script>
+	<script src="{% static '/vendors/hammer/jquery.hammer.js' %}"></script>
 
 	<script src="{% static '/vendors/hammer/hammer.min.js' %}"></script>
 	<script src="{% static '/vendors/hammer/jquery.hammer.js' %}"></script>
 
 	<style type="text/css">
-    body {
+    #menu {
+      background-color: #f1f1f1;
+      width: 310px;
+      height: 100%;
+      top: 0;
+      right: 0;
+      z-index: 2;
+      position: fixed;
+      padding: 5px;
       display: flex;
-      flex: auto;
+      flex-direction: column;
     }
-		#colorPalette {
-/* 			width: 300px; */
-			background-color: #f1f1f1;
-/* 			display: flex; */
-/* 			flex-wrap: wrap; */
-/* 			position: absolute;
-			top: 0; */
+		canvas#colorPalette {
+      height: 310px;
+      width: 100%;
+      align-self: center
 		}
+/*     canvas#colorPalette[resize] {
+      height: 310px;
+      width: 310px;      
+    } */
 		.swatch {
 			width: 24px;
 			height: 24px;
@@ -33,57 +45,61 @@
 			border-radius: 12px;
 			margin: 3px;
 		}
-/*     canvas#myCanvas {
-      width: 100vmin;
-      height: 100vmin;
-    } */
 		#myCanvas {
-			padding-left: 0;
-      padding-right: 0;
-      margin-left: auto;
-      margin-right: auto;
+      margin: auto;
       border-style: solid;
       border-width: 2px;
+      min-width: 750px;
 		}
+    #myCanvas[resize] {
+    }
+    button {
+      width: 100px;
+    }
 	</style>
 
 	<script type="text/javascript" canvas="canvas">
-		window.onload = function() {
-			var canvas = document.getElementById('myCanvas');
-			// coloring page
-			var mandala = {
-				item: null,
-				lastClicked: null,
-				filePath: '/static/coloring/images/mandala-freepik.svg'
-			};
-      
-			// color palette
-			var cp = {
-				history: ["#000000"], // black selected by default
-				options: [],
-				$container: $('#colorPalette')
-			}
+    paper.install(window);
+    
+    var myCanvas, colorPalette;
+    var toolCanvas, toolPalette;
 
+    // color palette
+    var cp = {
+      history: ["#000000"], // black selected by default
+      options: [],
+    }
+    
+    window.onload = function() {
+      var mandala = {
+        item: null,
+        lastClicked: null,
+        filePath: '/static/coloring/images/mandala-freepik.svg'
+      };
+      
+      // coloring page
+      myCanvas = new PaperScope();
+      paper.setup('myCanvas');
+      
+      toolCanvas = new Tool();			
+      
 			// your rectangle gradient interaction goes in this function
 			// you may also add code outside of the function (e.g., global variables)
 			function myGradientInteraction(){
         
-        var rect = new paper.Rectangle(new paper.Point(150, 250), new paper.Point(575, 475));
-        var path = new paper.Path.Rectangle(rect);
+        var rect = new Rectangle(new Point(0, 0), new Size(400, 300));
+        rect.center = paper.project.view.center;
+        var path = new Path.Rectangle(rect);
 
         path.fillColor = 'red';
-        path.closed = true;
 
-        paper.view.draw();
-
-				var tool = new paper.Tool();
         var o;
 
-				tool.onMouseDown = function (event) {
+				toolCanvas.onMouseDown = function (event) {
           o = event.point;
 				}
 
-				tool.onMouseUp = function (event) {
+				toolCanvas.onMouseUp = function (event) {
 					var newFill = {
             gradient: {
               stops: [cp.history[cp.history.length - 2], cp.history[cp.history.length - 1]]
@@ -93,24 +109,128 @@
           }
           
           path.fillColor = newFill;
-          paper.view.draw();
 				}
 			}
 
 			// your custom interaction goes here!
 			// you may replace everything
 			function myCustomInteraction() {
-				var tool = new paper.Tool();
 
-				tool.onMouseDown = function (event) {
-				    var hit = mandala.item.hitTest(event.point, { tolerance: 10, fill: true });
-				    if (hit) {
-				        hit.item.fillColor = cp.history[cp.history.length - 1];
-				    }
+				toolCanvas.onMouseDown = function (event) {
+          var hit = mandala.item.hitTest(event.point, { tolerance: 10, fill: true });
+          if (hit) {
+              hit.item.fillColor = cp.history[cp.history.length - 1];
+          }
 				}
 			}
-
-
+      
+      // To see your myGradientInteraction version visit: 
+			// http://<your url>:8000/coloring/?type=gradient
+			// To see your myCustomInteraction version visit: 
+			// http://<your url>:8000/coloring/
+      
+      paper.project.importSVG(mandala.filePath, function(item) { 
+        mandala.item = item._children["design-freepik"];
+        mandala.item.bounds.size = new Size(paper.project.view.size.width - 4, paper.project.view.size.height - 4);
+        mandala.item.center = new Point(paper.project.view.center.x, paper.project.view.center.y);
+        
+        paper.project.insertLayer(0, mandala.item);
+        if (window.location.href.indexOf("gradient") > - 1) {
+          myGradientInteraction();	
+        } else {
+          myCustomInteraction();
+        }					
+      });     
+      
+//       paper.view.onResize = function(event) {
+//         myCanvas.position = paper.view.center;
+//       }
+      
+      ////////////////////////////////////////////////////
+      colorPalette = new PaperScope();
+      paper.setup('colorPalette');
+      
+      var pt = paper.view.size.width / 2;
+      var rec = new Rectangle({
+        from: [2, 2],
+        to: [paper.project.view.size.width - 4, (paper.project.view.size.height - 4) * 0.25]
+      });
+      var colorBar = new Path.Rectangle(rec);
+      colorBar.fillColor = {
+        gradient: {
+          stops: [['#bf4040'], ['#40bf40'], ['#4040bf'], ['#bf4040']]
+        }, origin: rec.leftCenter, destination: rec.rightCenter
+      };
+      colorBar.onMouseDown = function(event) {
+        
+      }
+//       var colorWheel = new Path.Circle({        
+//         center: [pt, pt],
+//         radius: pt - 5,
+//         strokeWidth: 10,
+//         closed: false
+//       });
+//       colorWheel.removeSegment(3);
+//       colorWheel.strokeColor = {
+//         gradient: {
+//           stops: [['#bf8040', 0], 
+//                   ['#bfbf40', (2 - Math.sqrt(3)) / 4], 
+//                   ['#80bf40', 0.25], 
+//                   ['#40bf40', 0.5], 
+//                   ['#40bf80', 0.75], 
+//                   ['#40bfbf', (2 + Math.sqrt(3)) / 4], 
+//                   ['#407fbf', 1]]
+//         }, origin: new Point(0, pt), destination: new Point(2 * pt, pt)        
+//       };
+//       var colorWheel1 = new Path.Circle({        
+//         center: [pt, pt],
+//         radius: pt - 5,
+//         strokeWidth: 10,
+//         closed: false,
+//         rotation: 180
+//       });
+//       colorWheel1.removeSegment(3);
+//       colorWheel1.strokeColor = {
+//         gradient: {
+//           stops: [['#bf8040', 0], 
+//                   ['#bf4040', (2 - Math.sqrt(3)) / 4], 
+//                   ['#bf4080', 0.25], 
+//                   ['#bf40bf', 0.5], 
+//                   ['#7f40bf', 0.75], 
+//                   ['#4040bf', (2 + Math.sqrt(3)) / 4], 
+//                   ['#407fbf', 1]]
+//         }, origin: new Point(0, pt), destination: new Point(2 * pt, pt)        
+//       };
+//       colorWheel.join(colorWheel1);
+//       colorWheel.closed = false;
+//       var c = Math.sqrt(3) / 2;
+//       var s = 0.5;
+//       var p11 = new Point(pt - c, pt - s); //p11.x / pt / pt
+//       var p12 = new Point(p11.x, pt + s);
+//       var p21 = new Point(pt - s, pt - c);
+//       var p22 = new Point(p21.x, pt + c);
+//       var p31 = new Point(pt, 0);
+//       var p32 = new Point(pt, 2 * pt);
+//       var p41 = new Point(pt + s, p21.y);
+//       var p42 = new Point(p41.x, p22.y);
+//       var p51 = new Point(pt + c, p11.y);
+//       var p52 = new Point(p51.x, p12.y);
+//       colorWheel.strokeColor = {
+//         gradient: {
+//           stops: [["#bf8040", 0],
+//                   [ "#bfbf40", [p11.x / pt / pt]],
+//                   [ "#80bf40", [p21.x / pt / pt]],
+//                   [ "#40bf40", 0.5],
+//                   [ "#40bf80", [p41.x / pt / pt]],
+//                   [ "#40bfbf", [p51.x / pt / pt]],
+//                   ["#407fbf", 1]]
+//         }, origin: new Point(0, pt), destination: new Point(2 * pt, pt) };
+//       colorWheel.fillColor.gradient.stops[1].color = { gradient: { stops: [["#bfbf40"], ["#bf4040"]] }, origin: p11, destination: p12 };
+//       colorWheel.fillColor.gradient.stops[2].color = { gradient: { stops: [["#80bf40"], ["#bf4080"]] }, origin: p21, destination: p22 };
+//       colorWheel.fillColor.gradient.stops[3].color = { gradient: { stops: [["#40bf40"], ["#bf40bf"]] }, origin: p31, destination: p32 };
+//       colorWheel.fillColor.gradient.stops[4].color = { gradient: { stops: [["#40bf80"], ["#7f40bf"]] }, origin: p41, destination: p42 };
+//       colorWheel.fillColor.gradient.stops[5].color = { gradient: { stops: [["#40bfbf"], ["#4040bf"]] }, origin: p51, destination: p52 };
+      
 			// create a color palette with the given colors
 			function createColorPalette(colors){
 
@@ -138,34 +258,19 @@
 				});
 			}
 
-			function init(custom) {
-				paper.setup(canvas);
-				getColorsCreatePalette();
-				paper.project.importSVG(mandala.filePath, function(item) {
-					    if (custom) {
-					    	myCustomInteraction();	
-					    } else {
-					    	myGradientInteraction();
-					    }			
-				}); 
-			}
-
-			// To see your myGradientInteraction version visit: 
-			// http://<your url>:8000/coloring/?type=gradient
-			// To see your myCustomInteraction version visit: 
-			// http://<your url>:8000/coloring/
-			var url = window.location.href;
-			if (url.indexOf("gradient") > -1) {
-				init(false);
-			} else {
-				init(true);
-			}
+			
 		}
 	</script>
 </head>
-<body>	
-
-	<canvas id="myCanvas" width="750px" height="750px"></canvas>
-	<div id="colorPalette"></div>
+<body>
+	<canvas id="myCanvas" height="750px" width="750px"></canvas>
+  <div id="menu">
+    <canvas id="colorPalette" resize="false"></canvas>
+    <div style="display: flex; justify-content: space-evenly; margin: 10px">
+      <button>fill</button>
+      <button>draw</button>   
+    </div>
+  </div>
+	
 </body>
 </html>
