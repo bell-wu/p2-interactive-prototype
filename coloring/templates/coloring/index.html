@@ -26,7 +26,7 @@
       flex-direction: column;
     }
 		canvas#colorPalette {
-      height: 310px;
+      height: 500px;
       width: 100%;
       align-self: center
 		}
@@ -60,10 +60,12 @@
     
     var myCanvas, colorPalette;
     var toolCanvas, toolPalette;
+    var curColor = new Color({hue: 0, saturation: 0.5, lightness: 0.5});
+    var colConfirm = true;
 
     // color palette
     var cp = {
-      history: ["#000000"], // black selected by default
+      history: [curColor], // black selected by default
       options: [],
     }
     
@@ -148,19 +150,99 @@
       paper.setup('colorPalette');
       
       var pt = paper.view.size.width / 2;
-      var rec = new Rectangle({
-        from: [2, 2],
-        to: [paper.project.view.size.width - 4, (paper.project.view.size.height - 4) * 0.25]
+      var colorBar = new Path.Rectangle({
+        point: [2, 2],
+        size: [paper.project.view.size.width - 2, (paper.project.view.size.width - 2) * 0.1]
       });
-      var colorBar = new Path.Rectangle(rec);
       colorBar.fillColor = {
         gradient: {
           stops: [['#bf4040'], ['#40bf40'], ['#4040bf'], ['#bf4040']]
-        }, origin: rec.leftCenter, destination: rec.rightCenter
+        }, origin: colorBar.bounds.leftCenter, destination: colorBar.bounds.rightCenter
       };
-      colorBar.onMouseDown = function(event) {
-        
-      }
+      
+      var slGrid = new Path.Rectangle({
+        point: [colorBar.bounds.x, colorBar.bounds.bottom + 2],
+        size: [colorBar.bounds.width, colorBar.bounds.width],
+        strokeColor: 'black'
+      });
+      slGrid.fillColor = {
+        gradient: {
+          stops: [[new Color({hue: curColor.hue, saturation: 0, lightness: 0})], [curColor], [new Color({hue: curColor.hue, saturation: 1, lightness: 1})]]    
+        }, origin: slGrid.bounds.topLeft, destination: slGrid.bounds.bottomRight
+      };
+      
+      var showCol = new Path.Rectangle({
+        point: [colorBar.bounds.x, slGrid.bounds.bottom + 2],
+        size: [(colorBar.bounds.width - 2) / 2 , (colorBar.bounds.width - 2) / 2],
+        strokeColor: 'black',
+        fillColor: curColor
+      });
+      
+      var tempCol = new Path.Rectangle({
+        point: [showCol.bounds.left, showCol.bounds.top],
+        size: [showCol.bounds.width, showCol.bounds.height / 2],
+        visible: false
+      });      
+      console.log(tempCol);
+      
+      colorBar.onMouseEnter = function(e) {
+        tempCol.visible = true;
+        tempCol.fillColor = {hue: (e.point.x - colorBar.bounds.x) / colorBar.bounds.width * 360, saturation: 0.5, lightness: 0.5};
+      };
+      
+      colorBar.onMouseMove = function(e) {
+        tempCol.fillColor.hue = (e.point.x - colorBar.bounds.x) / colorBar.bounds.width * 360;
+      };
+      
+      colorBar.onMouseLeave = function() {
+        if (tempCol.visible) tempCol.visible = false;
+      };
+      
+      colorBar.onMouseDown = function() {
+        if (!tempCol.visible) tempCol.visible = true;
+      };
+      
+      colorBar.onMouseUp = function(e) {
+        curColor = {hue: (e.point.x - colorBar.bounds.x) / colorBar.bounds.width * 360, saturation: 0.5, lightness: 0.5};
+        colConfirm = false;
+        showCol.fillColor = curColor;
+        tempCol.visible = false;
+        slGrid.fillColor.gradient.stops[0].color.hue = curColor.hue;
+        slGrid.fillColor.gradient.stops[1].color.hue = curColor.hue;
+        slGrid.fillColor.gradient.stops[2].color.hue = curColor.hue;
+      };
+      
+      slGrid.onMouseEnter = function(e) {
+        tempCol.visible = true;
+        tempCol.fillColor.saturation = (e.point.x - slGrid.bounds.x) / slGrid.bounds.width;
+        tempCol.fillColor.lightness = (e.point.y - slGrid.bounds.y) / slGrid.bounds.height;
+      };
+      
+      slGrid.onMouseMove = function(e) {
+        tempCol.fillColor.saturation = (e.point.x - slGrid.bounds.x) / slGrid.bounds.width;
+        tempCol.fillColor.lightness = (e.point.y - slGrid.bounds.y) / slGrid.bounds.height;
+      };
+      
+      slGrid.onMouseLeave = function() {
+        if (tempCol.visible) tempCol.visible = false;
+      };
+      
+      slGrid.onMouseDown = function() {
+        if (!tempCol.visible) tempCol.visible = true;
+      };
+      
+      slGrid.onMouseUp = function(e) {
+        curColor.saturation = (e.point.x - slGrid.bounds.x) / slGrid.bounds.width;
+        curColor.lightness = (e.point.y - slGrid.bounds.y) / slGrid.bounds.height;
+      
+        colConfirm = false;
+        showCol.fillColor = curColor;
+        tempCol.visible = false;
+      };
+      
+      
+//       colorBar.onM
+      
 //       var colorWheel = new Path.Circle({        
 //         center: [pt, pt],
 //         radius: pt - 5,
