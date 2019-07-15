@@ -11,7 +11,14 @@
 
 	<script src="{% static 'coloring/vendors/hammer/hammer.min.js' %}"></script>
 	<script src="{% static 'coloring/vendors/hammer/jquery.hammer.js' %}"></script>
-
+  
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  
+<!-- 	<script src="{% static 'coloring/vendors/contextmenu/bower.json' %}"></script>
+	<script src="{% static 'coloring/vendors/contextmenu/contextMenu.js' %}"></script>
+	<script src="{% static 'coloring/vendors/contextmenu/contextMenu.js.jquery.json' %}"></script>
+	<script src="{% static 'coloring/vendors/contextmenu/contextMenu.min.js' %}"></script> -->
+  
 	<style type="text/css">
     body {
       display: flex;
@@ -136,8 +143,11 @@
           
           console.log('press');
           console.log(hit);
+          document.getElementById("popup").style.display = "block";
+          
         });
 			}
+      
 			// create a color palette with the given colors
 			function createColorPalette(colors){
 				// create a swatch for each color
@@ -186,12 +196,30 @@
 			} else {
 				init(true);
 			}
+      
+      
+      function closePopup() {
+        document.getElementById("popup").style.opacity = 0;
+      }
+
+      function openPopup() {
+        document.getElementById("popup").style.opacity = 1;
+      }
 		}
 	</script>
 </head>
 <body>	
 
-	<canvas id="myCanvas" width="750px" height="750px"></canvas>
+	<canvas id="myCanvas" width="750px" height="750px">
+    
+  </canvas>
 	<div id="color-palette"></div>
+  
+  <div id="popup">
+    <div class="swatch" style="background-color: rgb(3, 169, 244);"></div>
+    <div class="swatch" style="background-color: rgb(200, 169, 244);"></div>
+    <div class="swatch" style="background-color: rgb(3, 169, 9);"></div>
+      
+  </div>
 </body>
 </html>
